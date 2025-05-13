@@ -49,10 +49,10 @@ namespace Scripts.Calendar.Todos
         {            
             DataManager dataManager = DataManager.Instance;
             DateTime currentDate = dataManager.currentDate;
-            List<TodoData> listTodoData = dataManager.TodoList.GetTodoMonthDatas(currentDate);
-            List<TodoData> afterTodo = listTodoData.FindAll(todo=> currentDate.Day <= todo.Day);
-            PoolList poolList = dataManager.PoolList;
-            int listCount = listTodoData.Count;
+            List<TodoSet> listTodoSet = dataManager.Todo.GetBetweenDateTodo(currentDate);
+            
+            PoolManager poolList = dataManager.Pool;
+            int listCount = listTodoSet.Count;
 
             yield return ReturnGameObject();
 
@@ -61,7 +61,7 @@ namespace Scripts.Calendar.Todos
                 yield break;
             }
             List<Transform> newTodoItems = new();
-            foreach (var todoData in afterTodo)
+            foreach (var todoData in listTodoSet)
             {
                 TodoItem todoItem = poolList.Get<TodoItem>(_todoList);
                 todoItem.TodoUpdate(todoData);
@@ -90,10 +90,10 @@ namespace Scripts.Calendar.Todos
         private IEnumerator ShowDayTodo(TextMeshProUGUI tmp)
         {
             DataManager dataManager = DataManager.Instance;
-            PoolList poolList = dataManager.PoolList;
+            PoolManager poolList = dataManager.Pool;
             DateTime currentData = dataManager.currentDate;
             DateTime date = new DateTime(currentData.Year, currentData.Month, int.Parse(tmp.text));
-            TodoData todoData = dataManager.TodoList.GetTodoDayData(date);
+            TodoData todoData = dataManager.Todo.GetTodoDayData(date);
 
             yield return ReturnGameObject();
 

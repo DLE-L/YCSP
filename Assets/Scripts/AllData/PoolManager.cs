@@ -7,7 +7,7 @@ namespace Scripts.AllData
     /// <summary>
     /// 풀링 클래스
     /// </summary>
-    public class PoolList
+    public class PoolManager
     {        
         /// <summary>
         /// 타입별 풀링

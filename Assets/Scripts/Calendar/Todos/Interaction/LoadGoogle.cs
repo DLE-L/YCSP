@@ -31,7 +31,7 @@ namespace Scripts.Calendar.Todos.Interaction
             todoUiManager.OpenPopup(UiName);    
             var second = todoUiManager.StartLoading();        
             dataManager.SetCanvasRaycast(false);            
-            await DataManager.Instance.TodoList.UpdateFromGoogleSheet();            
+            await DataManager.Instance.Todo.UpdateFromGoogleSheet();            
             await Task.Delay(second * 1000);            
             todoUiManager.ClosePopup();
             calendarUiManager.ShowCalendarUi();

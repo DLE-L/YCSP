@@ -34,7 +34,7 @@ namespace Scripts.Calendar.Todos
 
             var dataManager = DataManager.Instance;
             var todoUiManager = TodoUiManager.Instance;
-            var poolList = dataManager.PoolList;
+            var poolList = dataManager.Pool;
             int todoCount = todoData.TodoSets.Count;            
 
             List<Transform> newTodo = new();            
@@ -65,7 +65,7 @@ namespace Scripts.Calendar.Todos
                 var todo = transform.GetChild(1).GetComponent<Todo>();
                 yield return todo.ResetData();
             }
-            DataManager.Instance.PoolList.Return<TodoItem>(gameObject);
+            DataManager.Instance.Pool.Return<TodoItem>(gameObject);
         }
     }
 }

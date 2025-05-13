@@ -32,7 +32,7 @@ namespace Scripts.Calendar.Todos.Interaction
             var dataManager = DataManager.Instance;
             var todo = todoUiManager.GetCurrentTodo();
             todo.todoSet.Complete = Checkmark.enabled ? 1 : 0;
-            dataManager.TodoList.UpdateTodoComplete(todo.todoSet);
+            dataManager.Todo.UpdateTodoComplete(todo.todoSet);
             
             CalendarUiManager.Instance.ShowDayOnly(todo);
             todoUiManager.UpdateTodo(todo);

@@ -16,16 +16,17 @@ namespace Scripts.AllData
     public class DataManager : MonoBehaviour
     {
         // 테스트용 구글 시트트
-        // https://docs.google.com/spreadsheets/d/1XCO4tWxuM0OO-ih9mptPGTzUWaDn1GaB-oygUSJLL84/edit?gid=0#gid=0
+        // 원본 https://docs.google.com/spreadsheets/d/1XCO4tWxuM0OO-ih9mptPGTzUWaDn1GaB-oygUSJLL84/edit?gid=0#gid=0
+        // 간소화 https://docs.google.com/spreadsheets/d/1T0KuQ1RUWptv2XVKAl1EZaBXqPD4mfUre1JptMb-pIg/edit?gid=0#gid=0
         public static DataManager Instance;
 
         public ItemInfo itemInfo;
         public List<Day> days = new List<Day>();
 
-        public TaskList TaskList { get; private set; }
-        public TodoList TodoList { get; private set; }
-        public CalendarList CalendarList { get; private set; }
-        public PoolList PoolList { get; private set; }
+        public TaskManager Task { get; private set; }
+        public TodoManager Todo { get; private set; }
+        public CalendarManager Calendar { get; private set; }
+        public PoolManager Pool { get; private set; }
         public DateTime currentDate;
         public DateTime Today { get; private set; }
 
@@ -40,11 +41,11 @@ namespace Scripts.AllData
             {
                 Destroy(gameObject);
             }
-            TaskList = new TaskList();
-            TodoList = new TodoList();
-            CalendarList = new CalendarList();
-            PoolList = new PoolList();
-            PoolList.typeContainer = new Dictionary<Type, GameObject>()
+            Task = new TaskManager();
+            Todo = new TodoManager();
+            Calendar = new CalendarManager();
+            Pool = new PoolManager();
+            Pool.typeContainer = new Dictionary<Type, GameObject>()
             {
                 {typeof(TaskItem), itemInfo.taskItem.gameObject},
                 {typeof(TodoItem), itemInfo.todoItem.gameObject},
@@ -52,16 +53,11 @@ namespace Scripts.AllData
                 {typeof(Day), itemInfo.day.gameObject}
             };
 
-            TaskList.Load();
-            TodoList.Load();
-            CalendarList.LoadCalendarData();
+            Task.Load();
+            Todo.Load();
+            Calendar.LoadCalendarData();
 
             currentDate = Today = DateTime.Now;
-        }
-
-        public void ConnectTaskAndTodo(TaskData taskData)
-        {
-            TodoList.TaskData = taskData;
         }
 
         public void CompareDate()
@@ -88,5 +84,37 @@ namespace Scripts.AllData
         public TodoItem todoItem;
         public Todo todo;
         public Day day;
+    }
+
+        [System.Serializable]
+    public class StartDate 
+    {
+        public int Year;
+        public int Month;
+        public int Day;
+
+        public DateTime startDate => new(Year, Month, Day);
+        public StartDate(int year, int month, int day)
+        {
+            Year = year;
+            Month = month;
+            Day = day;
+        }
+    }
+
+    [System.Serializable]
+    public class EndDate
+    {
+        public int Year;
+        public int Month;
+        public int Day;
+
+        public DateTime endDate => new(Year, Month, Day);
+        public EndDate(int year, int month, int day)
+        {
+            Year = year;
+            Month = month;
+            Day = day;
+        }
     }
 }

@@ -50,7 +50,7 @@ namespace Scripts.Tasks
         public async void AddTask()
         {
             string url = _inputField.text;
-            errorMessage = await DataManager.Instance.TaskList.AddNewTask(url);
+            errorMessage = await DataManager.Instance.Task.AddNewTask(url);
             if (errorMessage != null)
             {
                 ShowErrorPopup();
@@ -63,8 +63,8 @@ namespace Scripts.Tasks
         private void TaskUpdate()
         {
             DataManager dataManager = DataManager.Instance;
-            var data = dataManager.TaskList.Tasks;
-            for (int i = 0; i < dataManager.TaskList.Index; i++)
+            var data = dataManager.Task.Tasks;
+            for (int i = 0; i < dataManager.Task.Tasks.Count; i++)
             {
                 GameObject obj = Instantiate(dataManager.itemInfo.taskItem.gameObject, _taskList);
                 obj.name = "TaskItem_" + i;
@@ -76,7 +76,7 @@ namespace Scripts.Tasks
 
         public void RemoveTaskItem(GameObject taskItem)
         {
-            DataManager.Instance.TaskList.RemoveTaskData(taskItem);
+            DataManager.Instance.Task.RemoveTaskData(taskItem);
             Destroy(taskItem);
         }
 

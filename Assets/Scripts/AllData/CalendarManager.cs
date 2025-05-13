@@ -9,10 +9,9 @@ namespace Scripts.AllData
     /// 캘린더 데이터 캐싱 클래스
     /// </summary>
     [System.Serializable]
-    public class CalendarList
+    public class CalendarManager
     {
         [NonSerialized] private Dictionary<int, Dictionary<int, List<int>>> Data = new Dictionary<int, Dictionary<int, List<int>>>();
-
         [SerializeField] private List<YearData> _data = new List<YearData>();
 
         private const int TOTAL_DATE_NUM = 42;
@@ -68,12 +67,12 @@ namespace Scripts.AllData
             return days;
         }
 
-        public CalendarList LoadCalendarData()
+        public CalendarManager LoadCalendarData()
         {            
-            CalendarList tempList = JsonManager.LoadJson<CalendarList>("CalendarData");
+            CalendarManager tempList = JsonManager.LoadJson<CalendarManager>("CalendarData");
             if (tempList == null)
             {
-                tempList = new CalendarList();
+                tempList = new CalendarManager();
             }
             return tempList;
         }

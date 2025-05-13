@@ -32,7 +32,7 @@ namespace Scripts.Calendar.Todos.Interaction
         {
             todoSet = null;
             todoText.text = "이게 있으면 안되는디...";
-            DataManager.Instance.PoolList.Return<Todo>(gameObject);
+            DataManager.Instance.Pool.Return<Todo>(gameObject);
             yield return null;
         }
 

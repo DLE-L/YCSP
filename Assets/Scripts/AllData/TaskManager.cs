@@ -2,38 +2,32 @@ using UnityEngine;
 using Utils;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System;
 
 namespace Scripts.AllData
 {
     [System.Serializable]
-    public class TaskList
+    public class TaskManager
     {
-        public int Index = 0;
-        public List<TaskData> Tasks = new List<TaskData>();
+        public List<TaskData> Tasks = new();
 
         private void Save(string fileName = "Tasks")
         {
-            JsonManager.SaveJson<TaskList>(fileName, this);
+            JsonManager.SaveJson<TaskManager>(fileName, this);
         }
 
-        public TaskList Load(string fileName = "Tasks")
+        public TaskManager Load(string fileName = "Tasks")
         {
-            TaskList tempList = JsonManager.LoadJson<TaskList>(fileName);
+            TaskManager tempList = JsonManager.LoadJson<TaskManager>(fileName);
             if (tempList != null)
             {
-                Index = tempList.Index;
                 Tasks = tempList.Tasks;
             }
-            return tempList ?? new TaskList();
+            return tempList ?? new TaskManager();
         }
 
         public async Task<string> AddNewTask(string url)
         {
-            if (!url.Contains("gid=0"))
-            {
-                return "첫 시트가 아닙니다";
-            }
-
             string exportUrl = GoogleSheetManager.GetSheetUrl(url);
             if (string.IsNullOrEmpty(exportUrl))
             {
@@ -41,11 +35,10 @@ namespace Scripts.AllData
             }
 
             bool isDuplicate = Tasks.Find(task => task.TaskUrl == exportUrl) != null;
-            if (Index > 0 && isDuplicate)
+            if (Tasks.Count > 0 && isDuplicate)
             {
                 return "중복된 일정 입니다";
             }
-
 
             string csvData = await GoogleSheetManager.LoadCSVData(exportUrl);
 
@@ -55,44 +48,47 @@ namespace Scripts.AllData
                 return "데이터를 가져오지 못했습니다";
             }
 
-            SaveTaskData(csvData, exportUrl);
+            SaveTask(csvData, exportUrl);
 
             return null;
         }
 
-        private void SaveTaskData(string csvData, string taskUrl)
+        private void SaveTask(string csvData, string taskUrl)
         {
             // JSON 데이터 행 열
-            string[] rows = csvData.Split('\n');           
+            string[] rows = csvData.Split('\n');
 
             // 제목 할당
-            string[] titleRow = rows[1].Split(',');
-            string titleName = titleRow[0].Trim();
-
-            // 월별 주소 할당
-            List<UrlData> sheetUrl = new List<UrlData>(12);
-            UrlData urlData;
-            for (int i = 1; i <= sheetUrl.Capacity; i++)
+            string[] rowOne = rows[0].Split(',');
+            string titleName = rowOne[0].Trim();
+            string[] start = rowOne[1].Split('-');
+            string[] end = rowOne[2].Split('-');
+            StartDate startDate;
             {
-                string[] row = rows[i].Split(',');
-                string url = GoogleSheetManager.GetSheetUrl(row[2]);
-                urlData = new UrlData
-                {
-                    Month = int.Parse(row[1].Trim()),
-                    Url = url.Trim(),
-                };
-                sheetUrl.Add(urlData);
+                int year = int.Parse(start[0]);
+                int month = int.Parse(start[1]);
+                int day = int.Parse(start[2]);
+                startDate = new(year, month, day);
+            }
+            EndDate endDate;
+            {
+                int year = int.Parse(end[0]);
+                int month = int.Parse(end[1]);
+                int day = int.Parse(end[2]);
+                endDate = new(year, month, day);
             }
 
             TaskData taskData = new TaskData
             {
+                TaskStartDate = startDate,
+                TaskEndDate = endDate,
                 TaskUrl = taskUrl,
                 TitleName = titleName,
-                Urls = sheetUrl,
+                TodoManager = new(),
             };
-            
+            taskData.TodoManager.InitTodoManager(csvData);
+            taskData.TodoId = taskData.TodoManager.TodoManagerId;
             Tasks.Add(taskData);
-            Index++;
 
             Save();
         }
@@ -101,11 +97,7 @@ namespace Scripts.AllData
         {
             string[] stringIndex = taskItem.name.Split('_');
             int index = int.Parse(stringIndex[1].Trim());
-
-            DataManager.Instance.TodoList.RemoveTodoData(Tasks[index]);
             Tasks.RemoveAt(index);
-            
-            Index--;
 
             Save();
         }
@@ -114,16 +106,12 @@ namespace Scripts.AllData
     [System.Serializable]
     public class TaskData
     {
+        public StartDate TaskStartDate;
+        public EndDate TaskEndDate;
         public string TaskUrl;
         public string TitleName;
-        public List<UrlData> Urls = new List<UrlData>();
-    }
-
-    [System.Serializable]
-    public class UrlData
-    {
-        public int Month;
-        public string Url;
+        public string TaskId = Guid.NewGuid().ToString();
+        public string TodoId;
+        [NonSerialized] public TodoManager TodoManager = new();
     }
 }
-

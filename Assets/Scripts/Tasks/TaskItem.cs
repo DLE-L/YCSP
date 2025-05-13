@@ -42,8 +42,7 @@ namespace Scripts.Tasks
         }
 
         void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
-        {
-            DataManager.Instance.ConnectTaskAndTodo(taskData);
+        {            
             TaskUiManager.Instance.OpenCalendar();
         }
     }

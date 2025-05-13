@@ -45,9 +45,9 @@ namespace Scripts.Calendar.Date
         public void ShowCalendarUi()
         {
             DataManager dataManager = DataManager.Instance;
-            TodoList todoList = dataManager.TodoList;
+            TodoManager todoList = dataManager.Todo;
             DateTime date = dataManager.currentDate;
-            List<int> days = dataManager.CalendarList.GetDaysData(date.Year, date.Month);
+            List<int> days = dataManager.Calendar.GetDaysData(date.Year, date.Month);
             List<Day> scDays = dataManager.days;
 
             for (int i = 0; i < TOTAL_DATE_NUM; i++)
@@ -92,7 +92,7 @@ namespace Scripts.Calendar.Date
         public void ShowDayOnly(Todo todo)
         {
             var dataManager = DataManager.Instance;
-            var date = dataManager.TodoList.GetTodoDate(todo.todoSet);
+            var date = dataManager.Todo.GetTodoDate(todo.todoSet);
             foreach (var day in dataManager.days)
             {
                 if (day.date == date)
