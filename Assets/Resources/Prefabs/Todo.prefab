@@ -108,7 +108,7 @@ RectTransform:
   m_Father: {fileID: 3555073304317982527}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.05, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMax: {x: 0.95, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -140,7 +140,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uD574\uC57C \uD560 \uAC83\n"
+  m_text: "\uD574\uC57C \uD560 \uAC83"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: b6049357251f9424fa015931cf62ac82, type: 2}
   m_sharedMaterial: {fileID: -2651084422977963655, guid: b6049357251f9424fa015931cf62ac82, type: 2}
@@ -167,12 +167,12 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 40
-  m_fontSizeBase: 40
+  m_fontSize: 50
+  m_fontSizeBase: 50
   m_fontWeight: 400
   m_enableAutoSizing: 0
-  m_fontSizeMin: 1
-  m_fontSizeMax: 18
+  m_fontSizeMin: 18
+  m_fontSizeMax: 50
   m_fontStyle: 1
   m_HorizontalAlignment: 1
   m_VerticalAlignment: 8192
@@ -183,9 +183,9 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_TextWrappingMode: 1
+  m_TextWrappingMode: 0
   m_wordWrappingRatios: 0.4
-  m_overflowMode: 0
+  m_overflowMode: 3
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 0
@@ -275,7 +275,7 @@ MonoBehaviour:
   todoItemExpander: {fileID: 5781504300810401167}
   todoText: {fileID: 5564457827217537141}
   todoSet:
-    Id: 958a5a56-74b5-425d-a817-509f6e623ae8
+    TodoId: 2682318a-a435-47c7-8a5e-934c2a8b7025
     Todo: 
     Note: 
     Complete: 0

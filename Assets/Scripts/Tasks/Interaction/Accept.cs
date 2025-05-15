@@ -3,27 +3,26 @@ using UnityEngine.EventSystems;
 
 namespace Scripts.Tasks.Interaction
 {
-    public class Accept : MonoBehaviour, IPointerDownHandler
-    {
-        void IPointerDownHandler.OnPointerDown(PointerEventData eventData)
-        {
-            TaskUiManager uiManager = TaskUiManager.Instance;
-            var taskItem = uiManager.GetTaskItem();
-            GameObject target = TaskUiManager.Instance.OpenUis.Peek();
+	public class Accept : MonoBehaviour, IPointerDownHandler
+	{
+		void IPointerDownHandler.OnPointerDown(PointerEventData eventData)
+		{
+			var taskUiManager = TaskUiManager.Instance;
+			GameObject target = taskUiManager.OpenUis.Peek();
 
-            if (target == null) return;
+			if (target == null) return;
 
-            if (target.name.Equals("SheetUrl"))
-            {                
-                uiManager.AddTask();
-            }
-            else if (taskItem.GetComponent<TaskItem>() != null)
-            {
-                uiManager.RemoveTaskItem(taskItem);
-                uiManager.SetTaskItem(null);
-            }
+			if (target.name.Equals("SheetUrl"))
+			{
+				taskUiManager.AddTask();
+			}
+			else if (target.name.Equals("DeleteText"))
+			{
+				TaskItem taskItem = taskUiManager.taskItem;
+				taskUiManager.RemoveTaskItem(taskItem);
+			}
 
-            uiManager.ClosePopup();
-        }
-    }
+			taskUiManager.ClosePopup();
+		}
+	}
 }

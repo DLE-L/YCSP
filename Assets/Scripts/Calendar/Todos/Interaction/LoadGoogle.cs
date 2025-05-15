@@ -14,15 +14,6 @@ namespace Scripts.Calendar.Todos.Interaction
     {
         public string UiName => "LoadingSlider";
 
-        void Update()
-        {
-            // 개인 일정 추가 하면?
-            // if (TimeManager.HoldingOneSeconds(ref _isHolding, ref _holdTime))
-            // {
-            //     TodoUiManager.Instance.OpenPopup(gameObject);
-            // }
-        }
-
         async void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
         {
             var todoUiManager = TodoUiManager.Instance;
@@ -31,7 +22,7 @@ namespace Scripts.Calendar.Todos.Interaction
             todoUiManager.OpenPopup(UiName);    
             var second = todoUiManager.StartLoading();        
             dataManager.SetCanvasRaycast(false);            
-            await DataManager.Instance.Todo.UpdateFromGoogleSheet();            
+       //     await DataManager.Instance.Todo.UpdateFromGoogleSheet();            
             await Task.Delay(second * 1000);            
             todoUiManager.ClosePopup();
             calendarUiManager.ShowCalendarUi();

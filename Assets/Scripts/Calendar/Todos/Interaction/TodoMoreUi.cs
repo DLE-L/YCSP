@@ -1,5 +1,4 @@
 using Scripts.AllData;
-using Scripts.Calendar.Date;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -8,45 +7,48 @@ using Utils;
 
 namespace Scripts.Calendar.Todos.Interaction
 {
-    /// <summary>
-    /// 할일 자세히 보기 ui
-    /// </summary>
-    public class TodoMoreUi : MonoBehaviour, IOpenAble
+  /// <summary>
+  /// 할일 자세히 보기 ui
+  /// </summary>
+  public class TodoMoreUi : MonoBehaviour, IOpenAble
+  {
+    [SerializeField] private TextMeshProUGUI _endDate;
+    [SerializeField] private TextMeshProUGUI _todoContent;
+    [SerializeField] private TextMeshProUGUI _todoNote;
+    [SerializeField] private Graphic Checkmark;
+
+    public string UiName => throw new System.NotImplementedException();
+
+    public void UpdateMoreUi(TodoSet todoSet)
     {
-        [SerializeField] private TextMeshProUGUI todoContent;
-        [SerializeField] private TextMeshProUGUI todoNote;
-        [SerializeField] private Graphic Checkmark;
-
-        public string UiName => throw new System.NotImplementedException();
-
-        public void UpdateMoreUi(TodoSet todoSet)
-        {
-            todoContent.text = todoSet.Todo;
-            todoNote.text = todoSet.Note;
-            Checkmark.enabled = (todoSet.Complete != 0) ? true : false;
-        }
-
-        public void OnPointerClick(PointerEventData eventData)
-        {
-            var todoUiManager = TodoUiManager.Instance;
-            var dataManager = DataManager.Instance;
-            var todo = todoUiManager.GetCurrentTodo();
-            todo.todoSet.Complete = Checkmark.enabled ? 1 : 0;
-            dataManager.Todo.UpdateTodoComplete(todo.todoSet);
-            
-            CalendarUiManager.Instance.ShowDayOnly(todo);
-            todoUiManager.UpdateTodo(todo);
-            todoUiManager.ClosePopup();
-        }
-
-        public void OnPointerDown(PointerEventData eventData)
-        {
-
-        }
-
-        public void OnPointerUp(PointerEventData eventData)
-        {
-           
-        }
+      var dataManager = DataManager.Instance; 
+      TodoData todoData = dataManager.Todo.GetTodoData(todoSet.TodoId);
+      _endDate.text = todoData.EndDate.End;
+      _todoContent.text = todoSet.Todo;
+      _todoNote.text = todoSet.Note;
+      Checkmark.enabled = (todoSet.Complete != 0) ? true : false;
     }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+      var todoUiManager = TodoUiManager.Instance;
+      var dataManager = DataManager.Instance;
+      var todo = todoUiManager.GetCurrentTodo();
+      todo.todoSet.Complete = Checkmark.enabled ? 1 : 0;
+      dataManager.Todo.UpdateTodoComplete(todo.todoSet);
+
+      todoUiManager.UpdateTodo(todo);
+      todoUiManager.ClosePopup();
+    }
+
+    public void OnPointerDown(PointerEventData eventData)
+    {
+
+    }
+
+    public void OnPointerUp(PointerEventData eventData)
+    {
+
+    }
+  }
 }

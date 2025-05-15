@@ -49,10 +49,10 @@ namespace Scripts.Calendar.Todos
         {            
             DataManager dataManager = DataManager.Instance;
             DateTime currentDate = dataManager.currentDate;
-            List<TodoSet> listTodoSet = dataManager.Todo.GetBetweenDateTodo(currentDate);
+            List<TodoData> listTodoData = dataManager.Todo.GetBetweenDateTodo(currentDate);
             
             PoolManager poolList = dataManager.Pool;
-            int listCount = listTodoSet.Count;
+            int listCount = listTodoData.Count;
 
             yield return ReturnGameObject();
 
@@ -61,9 +61,9 @@ namespace Scripts.Calendar.Todos
                 yield break;
             }
             List<Transform> newTodoItems = new();
-            foreach (var todoData in listTodoSet)
+            foreach (var todoData in listTodoData)
             {
-                TodoItem todoItem = poolList.Get<TodoItem>(_todoList);
+                var todoItem = poolList.Get<TodoItem>(_todoList);
                 todoItem.TodoUpdate(todoData);
                 newTodoItems.Add(todoItem.transform);
             }
@@ -78,28 +78,6 @@ namespace Scripts.Calendar.Todos
             todo.gameObject.GetComponent<Image>().color = (todo.todoSet.Complete != 0) ? new Color32(0x32, 0xCD, 0x32, 0xFF) : new Color32(0xff, 0x9a, 0xa2, 255);
             // new Color32(0x32, 0xCD, 0x32, 0xFF);
         }
-
-        /// <summary>
-        /// 특정 날짜 클릭
-        /// </summary>
-        public void StartShowDayTodo(TextMeshProUGUI tmp)
-        {
-            StartCoroutine(ShowDayTodo(tmp));
-        }
-
-        private IEnumerator ShowDayTodo(TextMeshProUGUI tmp)
-        {
-            DataManager dataManager = DataManager.Instance;
-            PoolManager poolList = dataManager.Pool;
-            DateTime currentData = dataManager.currentDate;
-            DateTime date = new DateTime(currentData.Year, currentData.Month, int.Parse(tmp.text));
-            TodoData todoData = dataManager.Todo.GetTodoDayData(date);
-
-            yield return ReturnGameObject();
-
-            TodoItem todoItem = poolList.Get<TodoItem>(_todoList);
-            todoItem.TodoUpdate(todoData, date);
-        }        
 
         /// <summary>
         /// 풀링 ui관련 함수
