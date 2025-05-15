@@ -1635,6 +1635,7 @@ MonoBehaviour:
   _calendarCanvas: {fileID: 445935881}
   _taskCanvas: {fileID: 4956735}
   clipboardManager: {fileID: 317128574}
+  taskItem: {fileID: 0}
 --- !u!114 &317128574
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -24,6 +24,7 @@ namespace Scripts.AllData
 
     public TaskManager Task { get; private set; }
     public TodoManager Todo { get; private set; }
+    public TodoCompleteManager Complete { get; private set; }
     public CalendarManager Calendar { get; private set; }
     public PoolManager Pool { get; private set; }
     public DateTime currentDate;
@@ -42,6 +43,7 @@ namespace Scripts.AllData
       }
       Task = new TaskManager();
       Todo = new TodoManager();
+      Complete = new TodoCompleteManager();
       Calendar = new CalendarManager();
       Pool = new PoolManager();
       Pool.typeContainer = new Dictionary<Type, GameObject>()
@@ -53,7 +55,7 @@ namespace Scripts.AllData
             };
 
       Task.Load();
-      Todo.Load();
+      Complete.Load();
       Calendar.LoadCalendarData();
 
       currentDate = Today = DateTime.Now;

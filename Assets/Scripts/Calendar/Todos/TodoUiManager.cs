@@ -75,7 +75,7 @@ namespace Scripts.Calendar.Todos
 
         public void UpdateTodo(Todo todo)
         {
-            todo.gameObject.GetComponent<Image>().color = (todo.todoSet.Complete != 0) ? new Color32(0x32, 0xCD, 0x32, 0xFF) : new Color32(0xff, 0x9a, 0xa2, 255);
+            //todo.gameObject.GetComponent<Image>().color = (todo.todoSet.Complete != 0) ? new Color32(0x32, 0xCD, 0x32, 0xFF) : new Color32(0xff, 0x9a, 0xa2, 255);
             // new Color32(0x32, 0xCD, 0x32, 0xFF);
         }
 

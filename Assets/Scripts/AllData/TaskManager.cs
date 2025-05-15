@@ -14,22 +14,6 @@ namespace Scripts.AllData
 		[NonSerialized] private Dictionary<string, (DateTime, DateTime)> RangeDateLookup = new();
 		public List<TaskData> Tasks = new();
 
-		private void Save(string fileName = "Tasks")
-		{
-			JsonManager.SaveJson<TaskManager>(fileName, this);
-		}
-
-		public TaskManager Load(string fileName = "Tasks")
-		{
-			TaskManager tempList = JsonManager.LoadJson<TaskManager>(fileName);
-			if (tempList != null)
-			{
-				Tasks = tempList.Tasks;
-				SetLookupTable();
-			}
-			return tempList ?? new TaskManager();
-		}
-
 		public async Task<string> AddNewTask(string url)
 		{
 			string exportUrl = GoogleSheetManager.GetSheetUrl(url);
@@ -78,18 +62,12 @@ namespace Scripts.AllData
 				TitleName = titleName,
 				TodoManager = new(),
 			};
-			taskData.TodoManager.InitTodoManager(csvData, taskData.TaskId);
 
 			Tasks.Add(taskData);
-			if (!TaskIdLookup.ContainsKey(taskData.TaskId))
-			{
-				TaskIdLookup[taskData.TaskId] = Tasks.Count - 1;
-			}
+			TaskIdLookup[taskData.TaskId] = Tasks.Count - 1;
+			RangeDateLookup[taskData.TaskId] = (taskData.StartDate.Date, taskData.EndDate.Date);
 
-			if (!RangeDateLookup.ContainsKey(taskData.TaskId))
-			{
-				RangeDateLookup[taskData.TaskId] = (taskData.StartDate.Date, taskData.EndDate.Date);
-			}
+			taskData.TodoManager.InitTodoManager(csvData, taskData.TaskId);
 
 			Save();
 		}
@@ -101,30 +79,52 @@ namespace Scripts.AllData
 
 		public void RemoveTaskData(TaskItem taskItem)
 		{
+			var dataManager = DataManager.Instance;
+			var completeManager = dataManager.Complete;
 			string taskId = taskItem.taskData.TaskId;
-			int index = TaskIdLookup[taskId];
+			int index = TaskIdLookup[taskId];						
 			Tasks.RemoveAt(index);
-			TaskIdLookup.Remove(taskId);
+			completeManager.RemoveTodoComplete(taskId);
 
+			SetLookupTable();
 			Save();
 		}
 
 		public void SetLookupTable()
 		{
 			TaskIdLookup.Clear();
+			RangeDateLookup.Clear();
 			int count = 0;
 			foreach (var taskData in Tasks)
 			{
 				var key = taskData.TaskId;
-				if (!TaskIdLookup.ContainsKey(key))
-				{
-					TaskIdLookup[key] = count++;
-				}
-				if (!RangeDateLookup.ContainsKey(key))
-				{
-					RangeDateLookup[key] = (taskData.StartDate.Date, taskData.EndDate.Date);
-				}
+
+				TaskIdLookup[key] = count++;
+				RangeDateLookup[key] = (taskData.StartDate.Date, taskData.EndDate.Date);
 			}
+		}
+
+		private void Save(string fileName = "Tasks")
+		{
+			JsonManager.SaveJson<TaskManager>(fileName, this);
+		}
+
+		public TaskManager Load(string fileName = "Tasks")
+		{
+			var dataManager = DataManager.Instance;			
+			var tempList = JsonManager.LoadJson<TaskManager>(fileName);
+			TodoManager todoManager = dataManager.Todo;
+			if (tempList != null)
+			{
+				Tasks = tempList.Tasks;
+				foreach (var task in Tasks)
+				{
+					todoManager.Todos.AddRange(task.TodoManager.Todos);
+					todoManager.SetLookupTable();
+				}
+				SetLookupTable();
+			}
+			return tempList ?? new TaskManager();
 		}
 	}
 

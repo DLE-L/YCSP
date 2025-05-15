@@ -26,7 +26,7 @@ namespace Scripts.Calendar.Todos.Interaction
       _endDate.text = todoData.EndDate.End;
       _todoContent.text = todoSet.Todo;
       _todoNote.text = todoSet.Note;
-      Checkmark.enabled = (todoSet.Complete != 0) ? true : false;
+      //Checkmark.enabled = (todoSet.Complete != 0) ? true : false;
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -34,8 +34,8 @@ namespace Scripts.Calendar.Todos.Interaction
       var todoUiManager = TodoUiManager.Instance;
       var dataManager = DataManager.Instance;
       var todo = todoUiManager.GetCurrentTodo();
-      todo.todoSet.Complete = Checkmark.enabled ? 1 : 0;
-      dataManager.Todo.UpdateTodoComplete(todo.todoSet);
+     // todo.todoSet.Complete = Checkmark.enabled ? 1 : 0;
+      //dataManager.Todo.UpdateTodoComplete(todo.todoSet);
 
       todoUiManager.UpdateTodo(todo);
       todoUiManager.ClosePopup();

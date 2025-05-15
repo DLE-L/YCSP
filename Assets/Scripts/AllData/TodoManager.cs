@@ -11,18 +11,19 @@ namespace Scripts.AllData
   public class TodoManager
   {
     [NonSerialized] public string CurrentTaskId;
+    [NonSerialized] private Dictionary<(StartDate, EndDate), List<TodoSet>> SetsLookup = new();
     [NonSerialized] private Dictionary<string, TodoGroup> GroupLookup = new();
     [NonSerialized] private Dictionary<string, TodoData> DataLookup = new();
-    [NonSerialized] private Dictionary<(StartDate, EndDate), List<TodoSet>> SetsLookup = new();
     [NonSerialized] private Dictionary<string, TodoSet> SetLookup = new();
-    [NonSerialized] private Dictionary<string, TodoCache> CacheLookup = new();
-    [SerializeField] private List<CacheList> Caches = new();
-    [SerializeField] private List<TodoGroup> Todos = new();
+    [SerializeField] public List<TodoGroup> Todos = new();
 
     public void InitTodoManager(string csvData, string taskId)
     {
       string[] rows = csvData.Split('\n');
       int maxColumnCount = rows.Max(row => row.Split(',').Length);
+
+      var dataManager = DataManager.Instance;
+      TodoCompleteManager todoCompleteManager = dataManager.Complete;
 
       TodoGroup todoGroup = new()
       {
@@ -61,17 +62,16 @@ namespace Scripts.AllData
           };
           todoData.TodoSets.Add(todoSet);
           DataLookup[todoSet.TodoId] = todoData;
+          todoCompleteManager.InitTodoComplete(todoSet.TodoId);
         }
         todoGroup.TodoDatas.Add(todoData);
         SetsLookup[(startDate, endDate)] = todoData.TodoSets;
       }
       Todos.Add(todoGroup);
-      if (!GroupLookup.ContainsKey(taskId))
-      {
-        GroupLookup[taskId] = todoGroup;
-      }
+      GroupLookup[taskId] = todoGroup;
 
-      Save();
+      todoCompleteManager.InitCompleteGroup(taskId);
+      todoCompleteManager.InitTodoCompleteManager();      
     }
 
     /// <summary>
@@ -85,27 +85,19 @@ namespace Scripts.AllData
       foreach (var todoGroup in Todos)
       {
         string taskId = todoGroup.TaskId;
-        if (!GroupLookup.ContainsKey(taskId))
-        {
-          GroupLookup[taskId] = todoGroup;
-        }
+        GroupLookup[taskId] = todoGroup;
 
         foreach (var todoData in todoGroup.TodoDatas)
         {
           var key = (todoData.StartDate, todoData.EndDate);
-          if (!SetsLookup.TryGetValue(key, out var todoSets))
-          {
-            todoSets = new();
-            SetsLookup[key] = todoSets;
-          }
-          todoSets.AddRange(todoData.TodoSets);
-
+          SetsLookup[key] = todoData.TodoSets;
+          
           foreach (var todoSet in todoData.TodoSets)
           {
             DataLookup[todoSet.TodoId] = todoData;
           }
         }
-      }
+      }      
     }
 
     public List<TodoData> GetBetweenDateTodo(DateTime nowDate)
@@ -117,53 +109,6 @@ namespace Scripts.AllData
     public TodoData GetTodoData(string todoId)
     {
       return DataLookup[todoId];
-    }
-
-    public void UpdateTodoComplete(TodoSet todoSet)
-    {
-      string setId = todoSet.TodoId;
-      if (!SetLookup.TryGetValue(setId, out var set)) return;
-      int complete = todoSet.Complete;
-
-      if (!CacheLookup.TryGetValue(setId, out var cache))
-      {
-        cache = new TodoCache() { TodoId = setId, Complete = complete };
-        CacheLookup[setId] = cache;
-
-        CacheList cacheList = Caches.Find(list => list.TaskId == CurrentTaskId);
-
-        if (cacheList == null)
-        {
-          cacheList = new CacheList() { TaskId = CurrentTaskId };
-          Caches.Add(cacheList);
-          Save();
-        }
-        cacheList.TodoCaches.Add(cache);
-      }
-
-      if (cache.Complete != complete || set.Complete != complete)
-      {
-        cache.Complete = complete;
-        set.Complete = complete;
-        Save();
-      }
-    }
-    
-    private void Save(string fileName = "Todos")
-    {
-      JsonManager.SaveJson<TodoManager>(fileName, this);
-    }
-
-    public TodoManager Load(string fileName = "Todos")
-    {
-      TodoManager tempTodo = JsonManager.LoadJson<TodoManager>(fileName);
-      if (tempTodo != null)
-      {
-        Todos = tempTodo.Todos;
-        Caches = tempTodo.Caches;
-        SetLookupTable();
-      }
-      return tempTodo ?? new TodoManager();
     }
   }
 
@@ -188,21 +133,6 @@ namespace Scripts.AllData
     public string TodoId = Guid.NewGuid().ToString();
     public string Todo;
     public string Note;
-    public int Complete;
-  }
-
-  [System.Serializable]
-  public class CacheList
-  {
-    public string TaskId;
-    public List<TodoCache> TodoCaches = new();
-  }
-
-  [System.Serializable]
-  public class TodoCache
-  {
-    public string TodoId;
-    public int Complete;
   }
 }
 /*
