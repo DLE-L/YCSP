@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Scripts.Calendar.Date;
 using Scripts.Calendar.Date.Interaction;
 using Scripts.Calendar.Todos;
@@ -18,6 +19,7 @@ namespace Scripts.AllData
     // 테스트용 구글 시트트
     // 원본 https://docs.google.com/spreadsheets/d/1XCO4tWxuM0OO-ih9mptPGTzUWaDn1GaB-oygUSJLL84/edit?gid=0#gid=0
     // 간소화 https://docs.google.com/spreadsheets/d/1T0KuQ1RUWptv2XVKAl1EZaBXqPD4mfUre1JptMb-pIg/edit?gid=0#gid=0
+    // https://docs.google.com/spreadsheets/d/1T0KuQ1RUWptv2XVKAl1EZaBXqPD4mfUre1JptMb-pIg/edit?gid=713577195#gid=713577195
     public static DataManager Instance;
 
     public ItemInfo itemInfo;
@@ -55,15 +57,11 @@ namespace Scripts.AllData
             };
 
       Task.Load();
+      Todo.Load();
       Complete.Load();
       Calendar.LoadCalendarData();
 
       currentDate = Today = DateTime.Now;
-    }
-
-    public void CompareDate()
-    {
-      currentDate = (currentDate.Year == Today.Year && currentDate.Month == Today.Month) ? Today : new DateTime(currentDate.Year, currentDate.Month, 1);
     }
 
     public void SetCanvasRaycast(bool acitve)
@@ -75,6 +73,11 @@ namespace Scripts.AllData
       calendar.SetCanvasRaycast(acitve);
       task.SetCanvasRaycast(acitve);
       explain.SetCanvasRaycast(acitve);
+    }
+
+    public void SetCompleteData(string todoId)
+    {
+
     }
   }
 
@@ -91,14 +94,9 @@ namespace Scripts.AllData
   public class StartDate
   {
     public string Start;
-    public DateTime Date;
+    public DateTime Date => DateTime.ParseExact(Start, "yyyy-MM-dd", CultureInfo.InvariantCulture);
     public StartDate(string start)
     {
-      string[] date = start.Split('-');
-      int year = int.Parse(date[0].Trim());
-      int month = int.Parse(date[1].Trim());
-      int day = int.Parse(date[2].Trim());
-      Date = new(year, month, day);
       Start = start;
     }
   }
@@ -107,14 +105,9 @@ namespace Scripts.AllData
   public class EndDate
   {
     public string End;
-    public DateTime Date;
+    public DateTime Date => DateTime.ParseExact(End, "yyyy-MM-dd", CultureInfo.InvariantCulture);
     public EndDate(string end)
     {
-      string[] date = end.Split('-');
-      int year = int.Parse(date[0].Trim());
-      int month = int.Parse(date[1].Trim());
-      int day = int.Parse(date[2].Trim());
-      Date = new(year, month, day);
       End = end;
     }
   }

@@ -21,23 +21,23 @@ namespace Scripts.Calendar.Todos.Interaction
 
     public void UpdateMoreUi(TodoSet todoSet)
     {
-      var dataManager = DataManager.Instance; 
+      var dataManager = DataManager.Instance;
+      TodoComplete todoComplete = dataManager.Complete.GetTodoComplete(todoSet.TodoId);
       TodoData todoData = dataManager.Todo.GetTodoData(todoSet.TodoId);
       _endDate.text = todoData.EndDate.End;
       _todoContent.text = todoSet.Todo;
       _todoNote.text = todoSet.Note;
-      //Checkmark.enabled = (todoSet.Complete != 0) ? true : false;
+      Checkmark.enabled = (todoComplete.Complete != 0) ? true : false;
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
       var todoUiManager = TodoUiManager.Instance;
       var dataManager = DataManager.Instance;
-      var todo = todoUiManager.GetCurrentTodo();
-     // todo.todoSet.Complete = Checkmark.enabled ? 1 : 0;
-      //dataManager.Todo.UpdateTodoComplete(todo.todoSet);
-
-      todoUiManager.UpdateTodo(todo);
+      Todo todo = todoUiManager.GetCurrentTodo();
+      dataManager.Complete.SetTodoComplete(todo.todoSet.TodoId, Checkmark.enabled ? 1 : 0);
+  
+      //todoUiManager.UpdateTodo(todo);
       todoUiManager.ClosePopup();
     }
 

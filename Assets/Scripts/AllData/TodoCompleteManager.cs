@@ -12,32 +12,47 @@ namespace Scripts.AllData
     [NonSerialized] private Dictionary<string, CompleteGroup> GroupLookup = new();
     [NonSerialized] private Dictionary<string, TodoComplete> CompleteLookup = new();    
     [SerializeField] private List<CompleteGroup> TodoCompletes = new();
-
-    public void InitCompleteGroup(string taskId)
+    
+    public void InitTodoCompleteManager(TodoGroup todoGroup)
     {
-      GroupLookup[taskId] = new() { TaskId = taskId, TodoCompletes = new() };
-    }
+      string taskId = todoGroup.TaskId;
+      if (GroupLookup.ContainsKey(taskId)) return;
 
-    public void InitTodoComplete(string todoId)
-    {
-      CompleteLookup[todoId] = new() { TodoId = todoId, Complete = 0 };
-    }
-
-    public void InitTodoCompleteManager()
-    {
-      int count = 0;
-      foreach (var group in GroupLookup)
+      CompleteGroup completeGroup = new()
       {
-        GroupIndexLookup[group.Key] = count++;
-        CompleteGroup completeGroup = new() { TaskId = group.Key, TodoCompletes = new() };
-        foreach (var complete in CompleteLookup)
+        TaskId = todoGroup.TaskId,
+        TodoCompletes = new()
+      };
+
+      foreach (var todoData in todoGroup.TodoDatas)
+      {
+        GroupLookup[taskId] = completeGroup;
+        GroupIndexLookup[taskId] = GroupIndexLookup.Count - 1;
+        foreach (var todoSet in todoData.TodoSets)
         {
-          TodoComplete todoComplete = new() { TodoId = complete.Key, Complete = 0 };
+          TodoComplete todoComplete = new()
+          {
+            TodoId = todoSet.TodoId,
+            Complete = 0
+          };
+
+          CompleteLookup[todoSet.TodoId] = todoComplete;
           completeGroup.TodoCompletes.Add(todoComplete);
         }
-        TodoCompletes.Add(completeGroup);
       }
+      TodoCompletes.Add(completeGroup);
       Save();
+    }
+
+    public void SetTodoComplete(string todoId, int isComplete)
+    {
+      CompleteLookup[todoId].Complete = isComplete;
+      Save();
+    }
+
+    public TodoComplete GetTodoComplete(string todoId)
+    {
+      return CompleteLookup[todoId];
     }
 
     public void SetLookupTable()
@@ -53,7 +68,7 @@ namespace Scripts.AllData
         GroupIndexLookup[key] = count++;
         foreach (var complete in group.TodoCompletes)
         {
-          CompleteLookup[key] = complete;
+          CompleteLookup[complete.TodoId] = complete;
         }
       }
     }

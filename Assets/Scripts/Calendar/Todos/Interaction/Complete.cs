@@ -5,7 +5,7 @@ using Utils;
 
 namespace Scripts.Calendar.Todos.Interaction
 {
-    public class TodoComplelete : MonoBehaviour, IOpenAble
+    public class Complete : MonoBehaviour, IOpenAble
     {
         public Graphic checkmark;
 

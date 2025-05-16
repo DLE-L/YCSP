@@ -4,13 +4,16 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
 using Scripts.Tasks;
+using Scripts.Calendar.Todos.Interaction;
 
 namespace Scripts.AllData
 {
 	[System.Serializable]
 	public class TaskManager
 	{
+		[NonSerialized] public string CurrentTaskId;
 		[NonSerialized] private Dictionary<string, int> TaskIdLookup = new();
+		[NonSerialized] private Dictionary<string, TaskData> DataLookup = new();
 		[NonSerialized] private Dictionary<string, (DateTime, DateTime)> RangeDateLookup = new();
 		public List<TaskData> Tasks = new();
 
@@ -60,16 +63,37 @@ namespace Scripts.AllData
 				EndDate = endDate,
 				TaskUrl = taskUrl,
 				TitleName = titleName,
-				TodoManager = new(),
 			};
-
 			Tasks.Add(taskData);
-			TaskIdLookup[taskData.TaskId] = Tasks.Count - 1;
-			RangeDateLookup[taskData.TaskId] = (taskData.StartDate.Date, taskData.EndDate.Date);
 
-			taskData.TodoManager.InitTodoManager(csvData, taskData.TaskId);
+			var dataManager = DataManager.Instance;
+			TodoManager todoManager = dataManager.Todo;
+			todoManager.UpdateTodoManager(csvData, taskData.TaskId);
 
+			SetLookupTable();
 			Save();
+		}
+
+		public async Task UpdateTaskData()
+		{
+			if (!DataLookup.ContainsKey(CurrentTaskId)) return;
+
+			TaskData taskData = DataLookup[CurrentTaskId];
+
+			string taskUrl = taskData.TaskUrl;
+			string csvData = await GoogleSheetManager.LoadCSVData(taskUrl);
+
+			string[] rows = csvData.Split('\n');
+			string[] rowOne = rows[0].Split(',');
+
+			// 기존 TaskData의 속성 업데이트 (TaskId는 변경하지 않음)
+			taskData.TitleName = rowOne[0].Trim();
+			taskData.StartDate = new StartDate(rowOne[1].Trim());
+			taskData.EndDate = new EndDate(rowOne[2].Trim());
+
+			var dataManager = DataManager.Instance;
+			TodoManager todoManager = dataManager.Todo;
+			todoManager.UpdateTodoManager(csvData, taskData.TaskId);
 		}
 
 		public (DateTime, DateTime) GetTaskDateRange(string taskId)
@@ -80,11 +104,14 @@ namespace Scripts.AllData
 		public void RemoveTaskData(TaskItem taskItem)
 		{
 			var dataManager = DataManager.Instance;
-			var completeManager = dataManager.Complete;
+			TodoManager todoManager = dataManager.Todo;
+			TodoCompleteManager completeManager = dataManager.Complete;			
 			string taskId = taskItem.taskData.TaskId;
+			
 			int index = TaskIdLookup[taskId];						
 			Tasks.RemoveAt(index);
 			completeManager.RemoveTodoComplete(taskId);
+			todoManager.RemoveTodoData(taskId);
 
 			SetLookupTable();
 			Save();
@@ -94,11 +121,13 @@ namespace Scripts.AllData
 		{
 			TaskIdLookup.Clear();
 			RangeDateLookup.Clear();
+			DataLookup.Clear();
 			int count = 0;
 			foreach (var taskData in Tasks)
 			{
 				var key = taskData.TaskId;
 
+				DataLookup[key] = taskData;
 				TaskIdLookup[key] = count++;
 				RangeDateLookup[key] = (taskData.StartDate.Date, taskData.EndDate.Date);
 			}
@@ -111,17 +140,11 @@ namespace Scripts.AllData
 
 		public TaskManager Load(string fileName = "Tasks")
 		{
-			var dataManager = DataManager.Instance;			
+			var dataManager = DataManager.Instance;
 			var tempList = JsonManager.LoadJson<TaskManager>(fileName);
-			TodoManager todoManager = dataManager.Todo;
 			if (tempList != null)
 			{
 				Tasks = tempList.Tasks;
-				foreach (var task in Tasks)
-				{
-					todoManager.Todos.AddRange(task.TodoManager.Todos);
-					todoManager.SetLookupTable();
-				}
 				SetLookupTable();
 			}
 			return tempList ?? new TaskManager();
@@ -136,6 +159,5 @@ namespace Scripts.AllData
 		public string TaskUrl;
 		public string TitleName;
 		public string TaskId = Guid.NewGuid().ToString();
-		public TodoManager TodoManager = new();
 	}
 }

@@ -7,37 +7,38 @@ using Utils;
 
 namespace Scripts.Calendar.Todos.Interaction
 {
-    /// <summary>
-    /// 구글 시트 데이터 로드 상호작용
-    /// </summary>
-    public class LoadGoogle : MonoBehaviour, IOpenAble
-    {
-        public string UiName => "LoadingSlider";
+	/// <summary>
+	/// 구글 시트 데이터 로드 상호작용
+	/// </summary>
+	public class LoadGoogle : MonoBehaviour, IOpenAble
+	{
+		public string UiName => "LoadingSlider";
 
-        async void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
-        {
-            var todoUiManager = TodoUiManager.Instance;
-            var calendarUiManager = CalendarUiManager.Instance;
-            var dataManager = DataManager.Instance;            
-            todoUiManager.OpenPopup(UiName);    
-            var second = todoUiManager.StartLoading();        
-            dataManager.SetCanvasRaycast(false);            
-       //     await DataManager.Instance.Todo.UpdateFromGoogleSheet();            
-            await Task.Delay(second * 1000);            
-            todoUiManager.ClosePopup();
-            calendarUiManager.ShowCalendarUi();
-            StartCoroutine(todoUiManager.TodoItemUpdate());
-            dataManager.SetCanvasRaycast(true);
-        }
+		async void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
+		{
+			var dataManager = DataManager.Instance;
+			var todoUiManager = TodoUiManager.Instance;
+			var calendarUiManager = CalendarUiManager.Instance;
 
-        public void OnPointerDown(PointerEventData eventData)
-        {
-            
-        }
+			todoUiManager.OpenPopup(UiName);
+			int second = todoUiManager.StartLoading();
+			dataManager.SetCanvasRaycast(false);
+			await dataManager.Task.UpdateTaskData();
+			await Task.Delay(second * 1000);
+			todoUiManager.ClosePopup();
+			calendarUiManager.ShowCalendarUi();
+			StartCoroutine(todoUiManager.TodoItemUpdate());
+			dataManager.SetCanvasRaycast(true);
+		}
 
-        public void OnPointerUp(PointerEventData eventData)
-        {
-           
-        }
-    }
+		public void OnPointerDown(PointerEventData eventData)
+		{
+
+		}
+
+		public void OnPointerUp(PointerEventData eventData)
+		{
+
+		}
+	}
 }

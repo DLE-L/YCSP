@@ -21,7 +21,7 @@ namespace Scripts.AllData
     public bool IsDateRange(DateTime date)
     {
       var dataManager = DataManager.Instance;
-      string id = dataManager.Todo.CurrentTaskId;
+      string id = dataManager.Task.CurrentTaskId;
       (DateTime, DateTime) taskRange = dataManager.Task.GetTaskDateRange(id);
       if (date.Month < taskRange.Item1.Month || date.Month > taskRange.Item2.Month) return false;
 

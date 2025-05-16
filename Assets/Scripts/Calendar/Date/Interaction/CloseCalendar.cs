@@ -10,7 +10,7 @@ namespace Scripts.Calendar.Date.Interaction
     {
       var dataManager = DataManager.Instance;
       var calendarManager = CalendarUiManager.Instance;
-      dataManager.Todo.CurrentTaskId = null;
+      dataManager.Task.CurrentTaskId = null;
       calendarManager.CloseCalendar();
     }
   }

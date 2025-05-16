@@ -81,7 +81,7 @@ namespace Scripts.Calendar.Date
       if (!dataManager.Calendar.IsDateRange(date.AddMonths(month))) yield break;
 
       dataManager.currentDate = dataManager.currentDate.AddMonths(month);
- //     yield return TodoUiManager.Instance.TodoItemUpdate();
+      yield return TodoUiManager.Instance.TodoItemUpdate();
       ShowCalendarUi();
     }
 

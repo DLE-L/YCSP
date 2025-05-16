@@ -1,3 +1,4 @@
+using System.Collections;
 using Scripts.AllData;
 using TMPro;
 using UnityEngine;
@@ -55,11 +56,11 @@ namespace Scripts.Tasks
     {
       var dataManager = DataManager.Instance;
       var taskUiManager = TaskUiManager.Instance;
-      dataManager.Todo.CurrentTaskId = taskData.TaskId;
+      dataManager.Task.CurrentTaskId = taskData.TaskId;
       taskUiManager.OpenCalendar();
     }
 
-    public void ResetData()
+    public IEnumerator ResetData()
     {
       var dataManager = DataManager.Instance;
       taskData = null;
@@ -67,6 +68,7 @@ namespace Scripts.Tasks
       startDate.text = null;
       endDate.text = null;
       dataManager.Pool.Return<TaskItem>(gameObject);
+      yield return null;
     }
   }
 }

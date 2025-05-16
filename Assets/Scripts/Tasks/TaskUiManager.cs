@@ -3,10 +3,11 @@ using UnityEngine;
 using Scripts.AllData;
 using Scripts.Calendar.Date;
 using Scripts.Calendar.Todos;
-using Utils;
 using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using System.Collections;
+using Utils;
 
 namespace Scripts.Tasks
 {
@@ -28,7 +29,7 @@ namespace Scripts.Tasks
     private string errorMessage;
     public override Dictionary<string, GameObject> uiData { get; set; } = new();
     public override Stack<GameObject> OpenUis { get; set; } = new();
-    
+
     public TaskItem taskItem;
     private void Start()
     {
@@ -38,12 +39,14 @@ namespace Scripts.Tasks
       _errorPopup.gameObject.SetActive(false);
 
       _calendarCanvas.enabled = false;
-      TaskUpdate();
+
+      StartCoroutine(TaskUpdate());
+      
       uiData = new()
       {
         { "SheetUrl", _sheetUrl },
-        { "DeleteText", _deleteText },        
-      };
+        { "DeleteText", _deleteText },
+      };  
     }
 
     public async void AddTask()
@@ -57,13 +60,16 @@ namespace Scripts.Tasks
         return;
       }
 
-      TaskUpdate();
+      StartCoroutine(TaskUpdate());
     }
 
-    private void TaskUpdate()
+    private IEnumerator TaskUpdate()
     {
       DataManager dataManager = DataManager.Instance;
       List<TaskData> taskData = dataManager.Task.Tasks;
+
+      yield return ReturnGameObject();
+
       for (int i = 0; i < dataManager.Task.Tasks.Count; i++)
       {
         var tempItem = dataManager.Pool.Get<TaskItem>(_taskList);
@@ -73,10 +79,21 @@ namespace Scripts.Tasks
       }
     }
 
+    private IEnumerator ReturnGameObject()
+    {
+      int childCount = _taskList.childCount;
+      for (int i = 1; i < childCount; i++)
+      {
+        var taskItem = _taskList.GetChild(1).GetComponent<TaskItem>();
+        yield return taskItem.ResetData();
+      }
+      yield return null;
+    }
+
     public void RemoveTaskItem(TaskItem taskItem)
     {
       var dataManager = DataManager.Instance;
-      dataManager.Task.RemoveTaskData(taskItem);      
+      dataManager.Task.RemoveTaskData(taskItem);
       taskItem.ResetData();
     }
 
@@ -96,7 +113,7 @@ namespace Scripts.Tasks
     public override void ClosePopup()
     {
       base.ClosePopup();
-      _taskPopup.SetActive(false);      
+      _taskPopup.SetActive(false);
       _inputField.text = null;
       taskItem = null;
     }
@@ -119,7 +136,7 @@ namespace Scripts.Tasks
       var todoUiManager = TodoUiManager.Instance;
 
       calendarManager.ShowCalendarUi();
-      //StartCoroutine(todoUiManager.TodoItemUpdate());
+      StartCoroutine(todoUiManager.TodoItemUpdate());
 
       _calendarCanvas.enabled = true;
       _taskCanvas.enabled = false;
