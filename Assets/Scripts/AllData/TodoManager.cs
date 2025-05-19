@@ -3,7 +3,6 @@ using System;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.Mathematics.Geometry;
 
 namespace Scripts.AllData
 {
@@ -25,6 +24,7 @@ namespace Scripts.AllData
       bool isExistKey = GroupLookup.ContainsKey(taskId);
       TodoGroup todoGroup = isExistKey ? GroupLookup[taskId] : new() { TaskId = taskId, TodoDatas = new() };
 
+      todoGroup.TodoDatas.Clear();
       for (int row = 2; row < rows.Length; row++)
       {
         string[] rowNum = rows[row].Split(',');
@@ -36,7 +36,7 @@ namespace Scripts.AllData
           StartDate = startDate,
           EndDate = endDate,
           TodoSets = new(),
-        };       
+        };
 
         if (rowNum.Length % 2 != 0)
         {
@@ -44,20 +44,36 @@ namespace Scripts.AllData
           rowNum[^1] = null;
         }
 
+        var key = (todoData.StartDate.Date, todoData.EndDate.Date);
+        List<TodoSet> tempSets = new();
+        int num = 0;
         for (int col = 2; col < maxColumnCount; col += 2)
         {
           if (string.IsNullOrEmpty(rowNum[col].Trim())) break;
-          TodoSet todoSet = new()
+          TodoSet todoSet = null;
+          if (!SetsLookup.TryGetValue(key, out var sets) || sets.Count <= num)
           {
-            Todo = rowNum[col].Trim(),
-            Note = rowNum[col + 1]?.Trim(),
-          };
-          todoData.TodoSets.Add(todoSet);
+            // 키가 없거나, 기존 목록의 개수가 num보다 작을 경우 새로운 TodoSet 생성
+            todoSet = new()
+            {
+              Todo = rowNum[col].Trim(),
+              Note = rowNum[col + 1]?.Trim(),
+            };
+          }
+          else
+          {
+            // 기존 목록에서 데이터를 가져와 수정
+            todoSet = sets[num++];
+            todoSet.Todo = rowNum[col].Trim();
+            todoSet.Note = rowNum[col + 1]?.Trim();
+          }
+          tempSets.Add(todoSet);
           SetLookup[todoSet.TodoId] = todoSet;
           DataLookup[todoSet.TodoId] = todoData;
         }
+        todoData.TodoSets.AddRange(tempSets);
         todoGroup.TodoDatas.Add(todoData);
-        SetsLookup[(startDate.Date, endDate.Date)] = todoData.TodoSets;
+        SetsLookup[(startDate.Date, endDate.Date)] = todoData.TodoSets;        
       }
 
       if (!isExistKey)
@@ -68,16 +84,37 @@ namespace Scripts.AllData
 
         var dataManager = DataManager.Instance;
         TodoCompleteManager todoCompleteManager = dataManager.Complete;
-        todoCompleteManager.InitTodoCompleteManager(todoGroup);
+        todoCompleteManager.UpdateTodoCompleteManager(todoGroup);
       }
 
+      SetLookupTable();
       Save();
+    }
+
+    public List<TodoData> GetBetweenDateTodo(DateTime nowDate)
+    {
+      var dataManager = DataManager.Instance;
+
+      if (dataManager.Task.CurrentTaskId == null) return null;
+
+      TodoGroup todoGroup = GroupLookup[dataManager.Task.CurrentTaskId];
+      return todoGroup.TodoDatas.FindAll(todo => todo.StartDate.Date <= nowDate.Date && nowDate.Date <= todo.EndDate.Date).ToList();
+    }
+
+    public TodoData GetTodoData(string todoId)
+    {
+      return DataLookup[todoId];
+    }
+
+    public TodoSet GetTodoSet(string todoId)
+    {
+      return SetLookup[todoId];
     }
 
     /// <summary>
     /// 실행시 딕셔너리 테이블 세팅
     /// </summary>
-    private void SetLookupTable()
+    public void SetLookupTable()
     {
       SetsLookup.Clear();
       DataLookup.Clear();
@@ -102,47 +139,27 @@ namespace Scripts.AllData
       }
     }
 
-    public List<TodoData> GetBetweenDateTodo(DateTime nowDate)
-    {
-      var dataManager = DataManager.Instance;
-      TodoGroup todoGroup = GroupLookup[dataManager.Task.CurrentTaskId];
-      return todoGroup.TodoDatas.FindAll(todo => todo.StartDate.Date <= nowDate.Date && nowDate.Date <= todo.EndDate.Date).ToList();
-    }
-
-    public TodoData GetTodoData(string todoId)
-    {
-      return DataLookup[todoId];
-    }
-
-    public TodoSet GetTodoSet(string todoId)
-    {
-      return SetLookup[todoId];
-    }
-
-    public void RemoveTodoData(string taskId)
+    public void RemoveTodo(string taskId)
     {
       int index = TodoIdLookup[taskId];
       Todos.RemoveAt(index);
-
-      SetLookupTable();
-      Save();
     }
-    
-		private void Save(string fileName = "Todos")
+
+    public void Save(string fileName = "Todos")
     {
       JsonManager.SaveJson<TodoManager>(fileName, this);
     }
 
-		public TodoManager Load(string fileName = "Todos")
-		{
-			var tempList = JsonManager.LoadJson<TodoManager>(fileName);
-			if (tempList != null)
-			{
-				Todos = tempList.Todos;
-				SetLookupTable();
-			}
-			return tempList ?? new TodoManager();
-		}
+    public TodoManager Load(string fileName = "Todos")
+    {
+      var tempList = JsonManager.LoadJson<TodoManager>(fileName);
+      if (tempList != null)
+      {
+        Todos = tempList.Todos;
+        SetLookupTable();
+      }
+      return tempList ?? new TodoManager();
+    }
   }
 
   [System.Serializable]

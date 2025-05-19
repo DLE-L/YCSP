@@ -38,6 +38,8 @@ namespace Scripts.Calendar.Todos
         {"LoadingSlider", _loadingSlider.gameObject},
         {"TodoMoreUi", _todoMoreUi},
       };
+
+      StartCoroutine(TodoItemUpdate());      
     }
 
     /// <summary>
@@ -47,36 +49,37 @@ namespace Scripts.Calendar.Todos
     {
       var dataManager = DataManager.Instance;
       var todoManager = dataManager.Todo;
+      dataManager.CompareDate();
       DateTime currentDate = dataManager.currentDate;
-      List<TodoData> listTodoData = todoManager.GetBetweenDateTodo(currentDate);      
+      List<TodoData> listTodoData = todoManager.GetBetweenDateTodo(currentDate) ?? new();
 
-      PoolManager poolList = dataManager.Pool;
-      int listCount = listTodoData.Count;
 
       yield return ReturnGameObject();
 
-      if (listCount < 1)
-      {
-        Debug.Log("적어");
-        yield break;
-      }
       List<Transform> newTodoItems = new();
       foreach (var todoData in listTodoData)
       {
-        var todoItem = poolList.Get<TodoItem>(_todoList);
-        todoItem.TodoUpdate(todoData);
-        newTodoItems.Add(todoItem.transform);
+        yield return SetTodo(todoData, newTodoItems);
       }
       for (int i = 0; i < newTodoItems.Count; i++)
       {
         newTodoItems[i].SetSiblingIndex(i);
       }
-      Debug.Log("끝");
+    }
+
+    private IEnumerator SetTodo(TodoData todoData, List<Transform> newTodoItems)
+    {
+      yield return null;
+      PoolManager poolList = DataManager.Instance.Pool;
+      var todoItem = poolList.Get<TodoItem>(_todoList);
+      todoItem.TodoUpdate(todoData);
+      newTodoItems.Add(todoItem.transform);      
     }
 
     public void UpdateTodo(Todo todo)
     {
-      //todo.gameObject.GetComponent<Image>().color = (todo.todoSet.Complete != 0) ? new Color32(0x32, 0xCD, 0x32, 0xFF) : new Color32(0xff, 0x9a, 0xa2, 255);
+      TodoComplete complete = DataManager.Instance.Complete.GetTodoComplete(todo.todoSet.TodoId);
+      todo.gameObject.GetComponent<Image>().color = (complete.Complete != 0) ? new Color32(0x32, 0xCD, 0x32, 0xFF) : new Color32(0xff, 0x9a, 0xa2, 255);
       // new Color32(0x32, 0xCD, 0x32, 0xFF);
     }
 

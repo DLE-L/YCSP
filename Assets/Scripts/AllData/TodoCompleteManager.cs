@@ -13,16 +13,16 @@ namespace Scripts.AllData
     [NonSerialized] private Dictionary<string, TodoComplete> CompleteLookup = new();    
     [SerializeField] private List<CompleteGroup> TodoCompletes = new();
     
-    public void InitTodoCompleteManager(TodoGroup todoGroup)
+    public void UpdateTodoCompleteManager(TodoGroup todoGroup)
     {
       string taskId = todoGroup.TaskId;
-      if (GroupLookup.ContainsKey(taskId)) return;
+      bool isExistKey = GroupLookup.ContainsKey(taskId);
+      CompleteGroup completeGroup = isExistKey ? GroupLookup[taskId] : new() { TaskId = taskId, TodoCompletes = new() };
 
-      CompleteGroup completeGroup = new()
+      if (isExistKey)
       {
-        TaskId = todoGroup.TaskId,
-        TodoCompletes = new()
-      };
+        RemoveTodoComplete(taskId);
+      }
 
       foreach (var todoData in todoGroup.TodoDatas)
       {

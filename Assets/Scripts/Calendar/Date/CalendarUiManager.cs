@@ -27,17 +27,16 @@ namespace Scripts.Calendar.Date
     {
       Instance = this;
       var dataManager = DataManager.Instance;
-      for (int i = 0; i < TOTAL_DATE_NUM; i++)
-      {
-        var obj = dataManager.itemInfo.day.gameObject;
-        Instantiate(obj, _pnlDay);
-      }
 
+      GameObject dayObj = dataManager.itemInfo.day.gameObject;
+      List<Day> days = new();
       for (int i = 0; i < TOTAL_DATE_NUM; i++)
       {
-        var day = _pnlDay.GetChild(i).GetComponent<Day>();
-        dataManager.Calendar.days.Add(day);
+        GameObject obj = Instantiate(dayObj, _pnlDay);
+        var day = obj.GetComponent<Day>();
+        days.Add(day);
       }
+      dataManager.Calendar.SetDays(days);
     }
 
     public void ShowCalendarUi()
@@ -46,7 +45,7 @@ namespace Scripts.Calendar.Date
       CalendarManager calendarManager = dataManager.Calendar;
       DateTime date = dataManager.currentDate;
       List<int> days = calendarManager.GetDaysData(date.Year, date.Month);
-      List<Day> scDays = calendarManager.days;
+      List<Day> scDays = calendarManager.GetDays();
 
       for (int i = 0; i < TOTAL_DATE_NUM; i++)
       {
@@ -55,6 +54,8 @@ namespace Scripts.Calendar.Date
 
         Day day = scDays[i];
         DayUi dayUi = scDays[i].dayUi;
+
+        day.day = dayValue;
 
         string newtxt = isActive ? dayValue.ToString() : string.Empty;
         // 기존 Ui 상태와 다를시 변경
@@ -65,6 +66,18 @@ namespace Scripts.Calendar.Date
       _tmpYear.text = date.Year.ToString();
       _tmpMonth.text = date.Month.ToString("D2");
     }
+
+    // public void UpdateDay(string todoId)
+    // {
+    //   var dataManager = DataManager.Instance;
+    //   TodoManager todoManager = dataManager.Todo;
+    //   CalendarManager calendarManager = dataManager.Calendar;
+    //   TodoData todoData = todoManager.GetTodoData(todoId);
+    //   Day day = calendarManager.GetDay(todoData.EndDate.Date);
+    //   //TodoComplete complete = DataManager.Instance.Complete.GetTodoComplete(todoId);
+
+    //   day.gameObject.GetComponent<Image>().color = /*(complete.Complete != 0) ? new Color32(0x32, 0xCD, 0x32, 0xFF) :*/ new Color32(0xff, 0x9a, 0xa2, 255);
+    // }
 
     /// <summary>
     /// 연도, 월, 날짜 변경시 호출출

@@ -12,11 +12,17 @@ namespace Scripts.AllData
   [System.Serializable]
   public class CalendarManager
   {
-    [NonSerialized] private Dictionary<int, Dictionary<int, List<int>>> Data = new Dictionary<int, Dictionary<int, List<int>>>();
-    [NonSerialized] public List<Day> days = new List<Day>();
-    [SerializeField] private List<YearData> _data = new List<YearData>();
+    [NonSerialized] private List<Day> days = new();
+    [NonSerialized] private Dictionary<int, Dictionary<int, List<int>>> Data = new();
+    [SerializeField] private List<YearData> _data = new();
 
     private const int TOTAL_DATE_NUM = 42;
+
+    public Day GetDay(DateTime end)    
+    {
+      int endDay = end.Date.Day;
+      return days.Find(day => day.day <= endDay);
+    }
 
     public bool IsDateRange(DateTime date)
     {
@@ -26,6 +32,16 @@ namespace Scripts.AllData
       if (date.Month < taskRange.Item1.Month || date.Month > taskRange.Item2.Month) return false;
 
       return true;
+    }
+
+    public void SetDays(List<Day> tempDays)
+    {
+      days = tempDays;
+    }
+
+    public List<Day> GetDays()
+    {
+      return days;
     }
 
     /// <summary>
@@ -54,7 +70,7 @@ namespace Scripts.AllData
       }
 
       Data[year][month] = days;
-      SaveCalendarData();
+      Save();
     }
 
     private List<int> DayCalculate(int year, int month)
@@ -79,7 +95,7 @@ namespace Scripts.AllData
       return days;
     }
 
-    public CalendarManager LoadCalendarData()
+    public CalendarManager Load()
     {
       CalendarManager tempList = JsonManager.LoadJson<CalendarManager>("Calendar");
       if (tempList == null)
@@ -89,27 +105,10 @@ namespace Scripts.AllData
       return tempList;
     }
 
-    private void SaveCalendarData()
+    private void Save()
     {
       DictionaryToList();
       JsonManager.SaveJson("Calendar", this);
-    }
-
-    private void ListToDictionary()
-    {
-      Data.Clear();
-      foreach (var yearData in _data)
-      {
-        if (!Data.ContainsKey(yearData.Year))
-        {
-          Data[yearData.Year] = new Dictionary<int, List<int>>();
-        }
-        foreach (var monthData in yearData.Month)
-        {
-
-          Data[yearData.Year][monthData.Month] = monthData.Days;
-        }
-      }
     }
 
     private void DictionaryToList()

@@ -41,12 +41,12 @@ namespace Scripts.Tasks
       _calendarCanvas.enabled = false;
 
       StartCoroutine(TaskUpdate());
-      
+
       uiData = new()
       {
         { "SheetUrl", _sheetUrl },
         { "DeleteText", _deleteText },
-      };  
+      };
     }
 
     public async void AddTask()

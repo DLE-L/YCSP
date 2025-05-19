@@ -2,10 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Scripts.Calendar.Date;
-using Scripts.Calendar.Date.Interaction;
 using Scripts.Calendar.Todos;
 using Scripts.Calendar.Todos.Interaction;
-using Scripts.Explain;
 using Scripts.Tasks;
 using UnityEngine;
 
@@ -29,8 +27,8 @@ namespace Scripts.AllData
     public TodoCompleteManager Complete { get; private set; }
     public CalendarManager Calendar { get; private set; }
     public PoolManager Pool { get; private set; }
-    public DateTime currentDate;
     public DateTime Today { get; private set; }
+    public DateTime currentDate;    
 
     private void Awake()
     {
@@ -59,7 +57,7 @@ namespace Scripts.AllData
       Task.Load();
       Todo.Load();
       Complete.Load();
-      Calendar.LoadCalendarData();
+      Calendar.Load();     
 
       currentDate = Today = DateTime.Now;
     }
@@ -68,11 +66,16 @@ namespace Scripts.AllData
     {
       var calendar = CalendarUiManager.Instance;
       var task = TaskUiManager.Instance;
-      var explain = ExplainUiManager.Instance;
+      //var explain = ExplainUiManager.Instance;
 
       calendar.SetCanvasRaycast(acitve);
       task.SetCanvasRaycast(acitve);
-      explain.SetCanvasRaycast(acitve);
+      //explain.SetCanvasRaycast(acitve);
+    }
+
+    public void CompareDate()
+    {
+      currentDate = (currentDate.Month == Today.Month && currentDate.Year == Today.Year) ? Today : new DateTime(currentDate.Year, currentDate.Month, 1);
     }
 
     public void SetCompleteData(string todoId)

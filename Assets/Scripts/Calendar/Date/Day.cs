@@ -1,7 +1,6 @@
 ﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using System;
 
 [System.Serializable]
 public class DayUi
@@ -15,7 +14,7 @@ namespace Scripts.Calendar.Date
   public class Day : MonoBehaviour
   {
     public DayUi dayUi;
-    public DateTime date;
+    public int day;
     void Start()
     {
       dayUi.tmp = GetComponentInChildren<TextMeshProUGUI>();

@@ -1,10 +1,8 @@
-using UnityEngine;
 using Utils;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
 using Scripts.Tasks;
-using Scripts.Calendar.Todos.Interaction;
 
 namespace Scripts.AllData
 {
@@ -94,27 +92,14 @@ namespace Scripts.AllData
 			var dataManager = DataManager.Instance;
 			TodoManager todoManager = dataManager.Todo;
 			todoManager.UpdateTodoManager(csvData, taskData.TaskId);
+
+			SetLookupTable();
+			Save();
 		}
 
 		public (DateTime, DateTime) GetTaskDateRange(string taskId)
 		{
 			return RangeDateLookup[taskId];
-		}
-
-		public void RemoveTaskData(TaskItem taskItem)
-		{
-			var dataManager = DataManager.Instance;
-			TodoManager todoManager = dataManager.Todo;
-			TodoCompleteManager completeManager = dataManager.Complete;			
-			string taskId = taskItem.taskData.TaskId;
-			
-			int index = TaskIdLookup[taskId];						
-			Tasks.RemoveAt(index);
-			completeManager.RemoveTodoComplete(taskId);
-			todoManager.RemoveTodoData(taskId);
-
-			SetLookupTable();
-			Save();
 		}
 
 		public void SetLookupTable()
@@ -133,6 +118,22 @@ namespace Scripts.AllData
 			}
 		}
 
+		public void RemoveTaskData(TaskItem taskItem)
+		{
+			var dataManager = DataManager.Instance;
+			TodoManager todoManager = dataManager.Todo;
+			TodoCompleteManager completeManager = dataManager.Complete;
+			string taskId = taskItem.taskData.TaskId;
+
+			int index = TaskIdLookup[taskId];
+			Tasks.RemoveAt(index);
+			completeManager.RemoveTodoComplete(taskId);
+			todoManager.RemoveTodo(taskId);
+
+			SetLookupTable();
+			Save();
+		}
+
 		private void Save(string fileName = "Tasks")
 		{
 			JsonManager.SaveJson<TaskManager>(fileName, this);
@@ -140,7 +141,6 @@ namespace Scripts.AllData
 
 		public TaskManager Load(string fileName = "Tasks")
 		{
-			var dataManager = DataManager.Instance;
 			var tempList = JsonManager.LoadJson<TaskManager>(fileName);
 			if (tempList != null)
 			{

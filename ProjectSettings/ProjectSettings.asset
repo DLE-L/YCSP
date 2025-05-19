@@ -167,7 +167,7 @@ PlayerSettings:
     Android: com.DLE.YCSP
     Lumin: com.DefaultCompany.com.unity.template.mobile2D
     Standalone: com.ycsp.dle
-    iPhone: com.DefaultCompany.com.unity.template.mobile2D
+    iPhone: com.DLE.YCSP
     tvOS: com.DefaultCompany.com.unity.template.mobile2D
   buildNumber:
     Standalone: 0
@@ -548,6 +548,9 @@ PlayerSettings:
   - serializedVersion: 3
     m_BuildTarget: WebGL
     m_Formats: 03000000
+  - serializedVersion: 3
+    m_BuildTarget: iOS
+    m_Formats: 03000000
   playModeTestRunnerEnabled: 0
   runPlayModeTestAsEditModeTest: 0
   actionOnDotNetUnhandledException: 1
@@ -913,11 +916,11 @@ PlayerSettings:
   captureStartupLogs: {}
   activeInputHandler: 1
   windowsGamepadBackendHint: 0
-  cloudProjectId: 
+  cloudProjectId: 2eacc9ea-60ba-4a2c-ad12-8e319025ab50
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: 
-  organizationId: 
+  projectName: YCSP
+  organizationId: cowdj08
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   hmiLoadingImage: {fileID: 0}

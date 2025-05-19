@@ -1,4 +1,5 @@
 using Scripts.AllData;
+using Scripts.Calendar.Date;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -12,6 +13,7 @@ namespace Scripts.Calendar.Todos.Interaction
   /// </summary>
   public class TodoMoreUi : MonoBehaviour, IOpenAble
   {
+    [SerializeField] private TextMeshProUGUI _startDate;
     [SerializeField] private TextMeshProUGUI _endDate;
     [SerializeField] private TextMeshProUGUI _todoContent;
     [SerializeField] private TextMeshProUGUI _todoNote;
@@ -24,6 +26,7 @@ namespace Scripts.Calendar.Todos.Interaction
       var dataManager = DataManager.Instance;
       TodoComplete todoComplete = dataManager.Complete.GetTodoComplete(todoSet.TodoId);
       TodoData todoData = dataManager.Todo.GetTodoData(todoSet.TodoId);
+      _startDate.text = todoData.StartDate.Start;
       _endDate.text = todoData.EndDate.End;
       _todoContent.text = todoSet.Todo;
       _todoNote.text = todoSet.Note;
@@ -33,11 +36,14 @@ namespace Scripts.Calendar.Todos.Interaction
     public void OnPointerClick(PointerEventData eventData)
     {
       var todoUiManager = TodoUiManager.Instance;
-      var dataManager = DataManager.Instance;
+      var calendarManager = CalendarUiManager.Instance;
+      var dataManager = DataManager.Instance;      
       Todo todo = todoUiManager.GetCurrentTodo();
+
       dataManager.Complete.SetTodoComplete(todo.todoSet.TodoId, Checkmark.enabled ? 1 : 0);
   
-      //todoUiManager.UpdateTodo(todo);
+      todoUiManager.UpdateTodo(todo);
+      //calendarManager.UpdateDay(todo.todoSet.TodoId);
       todoUiManager.ClosePopup();
     }
 

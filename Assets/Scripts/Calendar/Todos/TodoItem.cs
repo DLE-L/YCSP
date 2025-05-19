@@ -3,7 +3,6 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
 using TMPro;
-using System;
 using Scripts.Calendar.Todos.Interaction;
 
 namespace Scripts.Calendar.Todos
@@ -14,8 +13,13 @@ namespace Scripts.Calendar.Todos
   public class TodoItem : MonoBehaviour
   {
     [SerializeField] private Transform _todoUi;
-    [SerializeField] private TextMeshProUGUI _startDate;
+    //[SerializeField] private TextMeshProUGUI _startDate;
     [SerializeField] private TextMeshProUGUI _endDate;
+
+    void Start()
+    {
+      //_startDate.enabled = false;
+    }
 
     /// <summary>
     /// 해당 날짜 할일 업데이트
@@ -23,8 +27,8 @@ namespace Scripts.Calendar.Todos
     public void TodoUpdate(TodoData todoData)
     {
       if (todoData == null) return;
-      
-      _startDate.text = todoData.StartDate.Start;
+
+      //_startDate.text = todoData.StartDate.Start;
       _endDate.text = todoData.EndDate.End;
 
       var dataManager = DataManager.Instance;
@@ -59,6 +63,7 @@ namespace Scripts.Calendar.Todos
         yield return todo.ResetData();
       }
       DataManager.Instance.Pool.Return<TodoItem>(gameObject);
-    }
+    }   
+    
   }
 }
