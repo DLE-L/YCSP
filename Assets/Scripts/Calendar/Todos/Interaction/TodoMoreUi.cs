@@ -37,13 +37,13 @@ namespace Scripts.Calendar.Todos.Interaction
     {
       var todoUiManager = TodoUiManager.Instance;
       var calendarManager = CalendarUiManager.Instance;
-      var dataManager = DataManager.Instance;      
+      var dataManager = DataManager.Instance;
       Todo todo = todoUiManager.GetCurrentTodo();
 
       dataManager.Complete.SetTodoComplete(todo.todoSet.TodoId, Checkmark.enabled ? 1 : 0);
-  
+
       todoUiManager.UpdateTodo(todo);
-      //calendarManager.UpdateDay(todo.todoSet.TodoId);
+      //calendarManager.UpdateDay(todo.todoSet.TodoId);            
       todoUiManager.ClosePopup();
     }
 

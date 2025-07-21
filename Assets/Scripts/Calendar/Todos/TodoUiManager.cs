@@ -45,19 +45,21 @@ namespace Scripts.Calendar.Todos
     /// <summary>
     /// 해당 월 할일 아이템 데이터 업데이트
     /// </summary>
-    public IEnumerator TodoItemUpdate()
+    public IEnumerator TodoItemUpdate(bool isAll = false)
     {
       var dataManager = DataManager.Instance;
       var todoManager = dataManager.Todo;
+      var completeManager = dataManager.Complete;
       dataManager.CompareDate();
       DateTime currentDate = dataManager.currentDate;
-      List<TodoData> listTodoData = todoManager.GetBetweenDateTodo(currentDate) ?? new();
+      List<TodoData> listTodo = todoManager.GetBetweenDateTodo(currentDate) ?? new();
 
+      listTodo = completeManager.GetCompleteList(listTodo, isAll);
 
       yield return ReturnGameObject();
 
       List<Transform> newTodoItems = new();
-      foreach (var todoData in listTodoData)
+      foreach (var todoData in listTodo)
       {
         yield return SetTodo(todoData, newTodoItems);
       }
@@ -73,7 +75,7 @@ namespace Scripts.Calendar.Todos
       PoolManager poolList = DataManager.Instance.Pool;
       var todoItem = poolList.Get<TodoItem>(_todoList);
       todoItem.TodoUpdate(todoData);
-      newTodoItems.Add(todoItem.transform);      
+      newTodoItems.Add(todoItem.transform);
     }
 
     public void UpdateTodo(Todo todo)
@@ -164,6 +166,7 @@ namespace Scripts.Calendar.Todos
     public override void ClosePopup()
     {
       base.ClosePopup();
+      StartCoroutine(TodoItemUpdate());
       _todoPopup.SetActive(false);
       _currentTodo = null;
     }

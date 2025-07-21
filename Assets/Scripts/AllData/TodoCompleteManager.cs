@@ -2,6 +2,7 @@ using System;
 using Utils;
 using UnityEngine;
 using System.Collections.Generic;
+using NUnit.Framework;
 
 namespace Scripts.AllData
 {
@@ -54,6 +55,28 @@ namespace Scripts.AllData
     {
       return CompleteLookup[todoId];
     }
+
+    public List<TodoData> GetCompleteList(List<TodoData> listTodo, bool isAll)
+    {
+      List<TodoData> resultList = new();
+
+      foreach (var todoData in listTodo)
+      {
+        foreach (var todoSet in todoData.TodoSets)
+        {
+          if (isAll == false && GetTodoComplete(todoSet.TodoId).Complete == 0)
+          {
+            resultList.Add(todoData);
+          }
+          else if(isAll == true && GetTodoComplete(todoSet.TodoId).Complete == 1)
+          {
+            resultList.Add(todoData);
+          }
+        }
+      }
+
+      return resultList;
+    }    
 
     public void SetLookupTable()
     {

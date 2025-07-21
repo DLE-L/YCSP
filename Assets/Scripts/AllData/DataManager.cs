@@ -59,7 +59,7 @@ namespace Scripts.AllData
       Complete.Load();
       Calendar.Load();     
 
-      currentDate = Today = DateTime.Now;
+      currentDate = Today = DateTime.Now.Date;
     }
 
     public void SetCanvasRaycast(bool acitve)

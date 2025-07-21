@@ -10,7 +10,7 @@ namespace Scripts.Calendar.Todos.Interaction
 	/// <summary>
 	/// 구글 시트 데이터 로드 상호작용
 	/// </summary>
-	public class LoadGoogle : MonoBehaviour, IOpenAble
+	public class TodoLoadGoogle : MonoBehaviour, IOpenAble
 	{
 		public string UiName => "LoadingSlider";
 
@@ -27,7 +27,6 @@ namespace Scripts.Calendar.Todos.Interaction
 			await Task.Delay(second * 1000);
 			todoUiManager.ClosePopup();
 			calendarUiManager.ShowCalendarUi();
-			StartCoroutine(todoUiManager.TodoItemUpdate());
 			dataManager.SetCanvasRaycast(true);
 		}
 

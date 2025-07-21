@@ -24,6 +24,16 @@ namespace Scripts.AllData
       bool isExistKey = GroupLookup.ContainsKey(taskId);
       TodoGroup todoGroup = isExistKey ? GroupLookup[taskId] : new() { TaskId = taskId, TodoDatas = new() };
 
+      var groupSpecificSetsLookup = new Dictionary<(DateTime, DateTime), List<TodoSet>>();
+      if (isExistKey)
+      {
+        foreach (var todoData in todoGroup.TodoDatas)
+        {
+          var key = (todoData.StartDate.Date, todoData.EndDate.Date);
+          groupSpecificSetsLookup[key] = todoData.TodoSets;
+        }
+      }
+      
       todoGroup.TodoDatas.Clear();
       for (int row = 2; row < rows.Length; row++)
       {
@@ -51,7 +61,7 @@ namespace Scripts.AllData
         {
           if (string.IsNullOrEmpty(rowNum[col].Trim())) break;
           TodoSet todoSet = null;
-          if (!SetsLookup.TryGetValue(key, out var sets) || sets.Count <= num)
+          if (!groupSpecificSetsLookup.TryGetValue(key, out var sets) || sets.Count <= num)
           {
             // 키가 없거나, 기존 목록의 개수가 num보다 작을 경우 새로운 TodoSet 생성
             todoSet = new()
@@ -68,12 +78,9 @@ namespace Scripts.AllData
             todoSet.Note = rowNum[col + 1]?.Trim();
           }
           tempSets.Add(todoSet);
-          SetLookup[todoSet.TodoId] = todoSet;
-          DataLookup[todoSet.TodoId] = todoData;
         }
         todoData.TodoSets.AddRange(tempSets);
         todoGroup.TodoDatas.Add(todoData);
-        SetsLookup[(startDate.Date, endDate.Date)] = todoData.TodoSets;        
       }
 
       if (!isExistKey)
@@ -98,7 +105,13 @@ namespace Scripts.AllData
       if (dataManager.Task.CurrentTaskId == null) return null;
 
       TodoGroup todoGroup = GroupLookup[dataManager.Task.CurrentTaskId];
-      return todoGroup.TodoDatas.FindAll(todo => todo.StartDate.Date <= nowDate.Date && nowDate.Date <= todo.EndDate.Date).ToList();
+
+      var firstDayOfMonth = new DateTime(nowDate.Year, nowDate.Month, 1);
+      var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
+
+      return todoGroup.TodoDatas.FindAll(todo =>
+          todo.StartDate.Date.Date <= lastDayOfMonth && todo.EndDate.Date.Date >= firstDayOfMonth
+      ).OrderBy(todo => todo.EndDate.Date).ToList();
     }
 
     public TodoData GetTodoData(string todoId)
@@ -141,8 +154,12 @@ namespace Scripts.AllData
 
     public void RemoveTodo(string taskId)
     {
-      int index = TodoIdLookup[taskId];
-      Todos.RemoveAt(index);
+      if (!GroupLookup.ContainsKey(taskId)) return;
+      
+      var groupToRemove = GroupLookup[taskId];
+      Todos.Remove(groupToRemove);
+      SetLookupTable();
+      Save();
     }
 
     public void Save(string fileName = "Todos")
