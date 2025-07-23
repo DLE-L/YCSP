@@ -12,7 +12,7 @@ namespace Scripts.Calendar.Todos.Interaction
 	/// </summary>
 	public class TodoLoadGoogle : MonoBehaviour, IOpenAble
 	{
-		public string UiName => "LoadingSlider";
+		public string UiName => "";
 
 		async void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
 		{
@@ -20,11 +20,8 @@ namespace Scripts.Calendar.Todos.Interaction
 			var todoUiManager = TodoUiManager.Instance;
 			var calendarUiManager = CalendarUiManager.Instance;
 
-			todoUiManager.OpenPopup(UiName);
-			int second = todoUiManager.StartLoading();
 			dataManager.SetCanvasRaycast(false);
 			await dataManager.Task.UpdateTaskData();
-			await Task.Delay(second * 1000);
 			todoUiManager.ClosePopup();
 			calendarUiManager.ShowCalendarUi();
 			dataManager.SetCanvasRaycast(true);

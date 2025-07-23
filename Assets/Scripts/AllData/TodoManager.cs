@@ -16,72 +16,85 @@ namespace Scripts.AllData
     [NonSerialized] private Dictionary<string, TodoSet> SetLookup = new();
     [SerializeField] public List<TodoGroup> Todos = new();
 
+    /// <summary>
+    /// 할 일 목록 업데이트
+    /// </summary>
     public void UpdateTodoManager(string csvData, string taskId)
     {
       string[] rows = csvData.Split('\n');
-      int maxColumnCount = rows.Max(row => row.Split(',').Length);
-
       bool isExistKey = GroupLookup.ContainsKey(taskId);
       TodoGroup todoGroup = isExistKey ? GroupLookup[taskId] : new() { TaskId = taskId, TodoDatas = new() };
 
-      var groupSpecificSetsLookup = new Dictionary<(DateTime, DateTime), List<TodoSet>>();
+      // TodoSet조회 딕셔너리 생성
+      var existingTodoSets = new Dictionary<(DateTime, DateTime, string), TodoSet>();
       if (isExistKey)
       {
         foreach (var todoData in todoGroup.TodoDatas)
         {
-          var key = (todoData.StartDate.Date, todoData.EndDate.Date);
-          groupSpecificSetsLookup[key] = todoData.TodoSets;
+          foreach (var todoSet in todoData.TodoSets)
+          {
+            var key = (todoData.StartDate.Date, todoData.EndDate.Date, todoSet.Todo);
+            existingTodoSets.TryAdd(key, todoSet);
+          }
         }
       }
       
-      todoGroup.TodoDatas.Clear();
+      // 새로운 데이터 구조 생성, 중복 필터링
+      var newTodoDatas = new List<TodoData>();
+      var processedTodos = new HashSet<(DateTime, DateTime, string)>(); // CSV 내 중복 체크용
+
       for (int row = 2; row < rows.Length; row++)
       {
         string[] rowNum = rows[row].Split(',');
+        
+        // 시트에서 불러오는 열 개수는 4개(시작일, 종료일, 할일, 노트)
+        // 노트는 생략 가능
+        if (rowNum.Length < 3 || string.IsNullOrEmpty(rowNum[0].Trim())) continue;
+
         StartDate startDate = new(rowNum[0].Trim());
         EndDate endDate = new(rowNum[1].Trim());
+        string todoText = rowNum[2].Trim();
+        string noteText = rowNum.Length > 3 ? rowNum[3]?.Trim() : null;
 
-        TodoData todoData = new()
+        if (string.IsNullOrEmpty(todoText)) continue;
+
+        // CSV 데이터 내에서 중복된 내용(시작일, 종료일, 할일 내용이 동일)은 생략
+        var todoKey = (startDate.Date, endDate.Date, todoText);
+        if (processedTodos.Contains(todoKey))
+        {
+          continue;
+        }
+        processedTodos.Add(todoKey);
+
+        // 각 행마다 새로운 TodoData를 생성
+        var todoData = new TodoData
         {
           StartDate = startDate,
           EndDate = endDate,
-          TodoSets = new(),
+          TodoSets = new List<TodoSet>()
         };
 
-        if (rowNum.Length % 2 != 0)
-        {
-          Array.Resize(ref rowNum, rowNum.Length + 1);
-          rowNum[^1] = null;
+        // 기존에 있던 할일이면 ID유지, 새로운 할일이면 새로 생성
+        TodoSet todoSet;
+        if (existingTodoSets.TryGetValue(todoKey, out var existingSet))
+        {          
+          todoSet = existingSet;
+          todoSet.Note = noteText;
         }
-
-        var key = (todoData.StartDate.Date, todoData.EndDate.Date);
-        List<TodoSet> tempSets = new();
-        int num = 0;
-        for (int col = 2; col < maxColumnCount; col += 2)
+        else
         {
-          if (string.IsNullOrEmpty(rowNum[col].Trim())) break;
-          TodoSet todoSet = null;
-          if (!groupSpecificSetsLookup.TryGetValue(key, out var sets) || sets.Count <= num)
+          todoSet = new TodoSet
           {
-            // 키가 없거나, 기존 목록의 개수가 num보다 작을 경우 새로운 TodoSet 생성
-            todoSet = new()
-            {
-              Todo = rowNum[col].Trim(),
-              Note = rowNum[col + 1]?.Trim(),
-            };
-          }
-          else
-          {
-            // 기존 목록에서 데이터를 가져와 수정
-            todoSet = sets[num++];
-            todoSet.Todo = rowNum[col].Trim();
-            todoSet.Note = rowNum[col + 1]?.Trim();
-          }
-          tempSets.Add(todoSet);
+            Todo = todoText,
+            Note = noteText
+          };
         }
-        todoData.TodoSets.AddRange(tempSets);
-        todoGroup.TodoDatas.Add(todoData);
+        todoData.TodoSets.Add(todoSet);
+        newTodoDatas.Add(todoData);
       }
+
+      // 기존의 TodoDatas를 새로 생성된 데이터로 교체합니다.
+      todoGroup.TodoDatas = newTodoDatas;
 
       if (!isExistKey)
       {
@@ -161,7 +174,7 @@ namespace Scripts.AllData
       SetLookupTable();
       Save();
     }
-
+    
     public void Save(string fileName = "Todos")
     {
       JsonManager.SaveJson<TodoManager>(fileName, this);

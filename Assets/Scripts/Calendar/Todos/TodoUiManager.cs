@@ -26,8 +26,6 @@ namespace Scripts.Calendar.Todos
     public override Stack<GameObject> OpenUis { get; set; } = new();
 
     private Todo _currentTodo;
-    private int _loadingSecond;
-
     void Start()
     {
       Instance = this;
@@ -35,7 +33,6 @@ namespace Scripts.Calendar.Todos
       _todoPopup.SetActive(false);
       uiData = new()
       {
-        {"LoadingSlider", _loadingSlider.gameObject},
         {"TodoMoreUi", _todoMoreUi},
       };
 
@@ -97,35 +94,6 @@ namespace Scripts.Calendar.Todos
         yield return todoItem.ResetData();
       }
       yield return null;
-    }
-
-    /// <summary>
-    /// 구글 시트 데이터 가져올때 로딩 바
-    /// </summary>
-    public int StartLoading()
-    {
-      _loadingSlider.value = 0f;
-      StartCoroutine(Loading());
-      return _loadingSecond;
-    }
-
-    public IEnumerator Loading()
-    {
-      var dataManager = DataManager.Instance;
-      var count = 3;
-      _loadingSecond = count;
-
-      float delaySeconds = count;
-      float time = 0;
-      while (time < delaySeconds)
-      {
-        time += Time.deltaTime;
-        float progress = time / delaySeconds;
-        _loadingSlider.value = progress;
-        _loadingText.text = $"{progress * 100f:F0} %";
-        yield return null;
-      }
-      _loadingSlider.value = 1f;
     }
 
     /// <summary>
