@@ -52,7 +52,7 @@ namespace Scripts.Calendar.Todos
       List<TodoData> listTodo = todoManager.GetBetweenDateTodo(currentDate) ?? new();
 
       listTodo = completeManager.GetCompleteList(listTodo, isAll);
-
+      
       yield return ReturnGameObject();
 
       List<Transform> newTodoItems = new();
@@ -63,11 +63,12 @@ namespace Scripts.Calendar.Todos
       for (int i = 0; i < newTodoItems.Count; i++)
       {
         newTodoItems[i].SetSiblingIndex(i);
-      }
+      }      
     }
 
     private IEnumerator SetTodo(TodoData todoData, List<Transform> newTodoItems)
     {
+
       yield return null;
       PoolManager poolList = DataManager.Instance.Pool;
       var todoItem = poolList.Get<TodoItem>(_todoList);
